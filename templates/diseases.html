@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Supported Crop Diseases Directory | CropScan AI{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light border-bottom">
+  <div class="container">
+    <div class="text-center max-w-700 mx-auto">
+      <span class="text-uppercase text-success fw-bold small">Pathology Catalog</span>
+      <h1 class="fw-bold mb-3">Supported Crops & Foliar Pathologies</h1>
+      <p class="text-muted">
+        Comprehensive catalog of plant disease classifications indexed in the system's local knowledge base.
+        Covers {{ total_crops }} crop species and {{ total_diseases }} distinct biological categories.
+      </p>
+
+      <!-- Search Input -->
+      <div class="input-group my-4 shadow-sm mx-auto" style="max-width: 550px;">
+        <span class="input-group-text bg-white border-end-0 text-muted">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" id="disease-search-input" class="form-control border-start-0 ps-0"
+               placeholder="Search by crop (e.g. Tomato, Corn) or disease (e.g. Blight)..."
+               aria-label="Search diseases">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div id="disease-grid-container">
+      {% for crop, diseases in grouped_diseases.items() %}
+      <div class="crop-group mb-5" data-crop="{{ crop|lower }}">
+        <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom">
+          <div class="brand-icon" style="background: #2e7d32; color: #ffffff;">
+            <i class="fa-solid fa-plant-wilt"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold mb-0 text-success">{{ crop }}</h3>
+            <span class="text-muted small">{{ diseases|length }} Indexed Categories</span>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          {% for item in diseases %}
+          <div class="col-lg-6 disease-card-item" data-disease-name="{{ item.disease|lower }}" data-crop-name="{{ crop|lower }}">
+            <div class="card-custom h-100 p-4">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <span class="text-uppercase text-muted fw-bold small">{{ crop }}</span>
+                  <h4 class="fw-bold mb-1 fs-5 text-dark">{{ item.disease }}</h4>
+                  <code class="small text-muted">{{ item.class_key }}</code>
+                </div>
+                {% if item.is_healthy %}
+                <span class="badge-disease badge-healthy">
+                  <i class="fa-solid fa-check-circle me-1"></i> Healthy
+                </span>
+                {% else %}
+                <span class="badge-disease badge-infected">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i> Pathogen
+                </span>
+                {% endif %}
+              </div>
+
+              <p class="text-muted small mb-3">
+                {{ item.description }}
+              </p>
+
+              <!-- Symptoms -->
+              <div class="mb-3">
+                <h6 class="small fw-bold text-success mb-1">
+                  <i class="fa-solid fa-eye me-1"></i> Key Symptoms:
+                </h6>
+                <ul class="small text-muted ps-3 mb-0">
+                  {% for s in item.symptoms %}
+                  <li>{{ s }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <!-- Preventive Measures -->
+              <div class="mb-3">
+                <h6 class="small fw-bold text-primary mb-1">
+                  <i class="fa-solid fa-shield me-1"></i> Prevention:
+                </h6>
+                <ul class="small text-muted ps-3 mb-0">
+                  {% for p in item.prevention %}
+                  <li>{{ p }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <!-- Management -->
+              <div>
+                <h6 class="small fw-bold text-dark mb-1">
+                  <i class="fa-solid fa-hand-holding-medical me-1"></i> Recommended Interventions:
+                </h6>
+                <ul class="small text-muted ps-3 mb-0">
+                  {% for m in item.management %}
+                  <li>{{ m }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- No Results Placeholder -->
+    <div id="no-search-results" class="text-center py-5 d-none">
+      <i class="fa-solid fa-seedling text-muted fs-1 mb-3"></i>
+      <h5 class="fw-bold text-muted">No matching crop or disease found.</h5>
+      <p class="small text-muted">Try searching with a different crop name or disease term.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Filter Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("disease-search-input");
+    const diseaseCards = document.querySelectorAll(".disease-card-item");
+    const cropGroups = document.querySelectorAll(".crop-group");
+    const noResults = document.getElementById("no-search-results");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        const query = searchInput.value.trim().toLowerCase();
+        let totalVisible = 0;
+
+        cropGroups.forEach(group => {
+          let groupVisibleCards = 0;
+          const cardsInGroup = group.querySelectorAll(".disease-card-item");
+
+          cardsInGroup.forEach(card => {
+            const disease = card.getAttribute("data-disease-name") || "";
+            const crop = card.getAttribute("data-crop-name") || "";
+            const textContent = card.textContent.toLowerCase();
+
+            if (!query || disease.includes(query) || crop.includes(query) || textContent.includes(query)) {
+              card.style.display = "";
+              groupVisibleCards++;
+              totalVisible++;
+            } else {
+              card.style.display = "none";
+            }
+          });
+
+          if (groupVisibleCards > 0) {
+            group.style.display = "";
+          } else {
+            group.style.display = "none";
+          }
+        });
+
+        if (totalVisible === 0) {
+          noResults.classList.remove("d-none");
+        } else {
+          noResults.classList.add("d-none");
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

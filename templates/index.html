@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Disease Detection using CNN | AI Foliar Diagnostic Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section text-center text-lg-start">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background-color: #dcedc8; color: #33691e; font-size: 0.85rem; font-weight: 600;">
+          <i class="fa-solid fa-microchip"></i>
+          <span>B.Tech CSE Capstone Project &middot; Computer Vision</span>
+        </div>
+        <h1 class="hero-title">
+          Crop Disease Detection <br class="d-none d-md-inline">
+          <span style="color: #2e7d32;">using Convolutional Neural Network</span>
+        </h1>
+        <p class="hero-subtitle">
+          An automated agricultural screening system utilizing a deep convolutional neural network
+          (MobileNetV2) to classify foliar pathologies, identify plant stress, and deliver actionable
+          agronomic management recommendations.
+        </p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+          <a href="#analyzer-section" class="btn-agri" id="btn-hero-analyze">
+            <i class="fa-solid fa-camera"></i> Analyze Plant Leaf
+          </a>
+          <a href="{{ url_for('diseases') }}" class="btn-agri-outline" id="btn-hero-diseases">
+            <i class="fa-solid fa-list-check"></i> Supported Diseases
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 mt-4 mt-lg-0 text-center">
+        <div class="card-custom p-4 shadow-sm bg-white text-start">
+          <h6 class="text-uppercase text-muted fw-bold small mb-3">
+            <i class="fa-solid fa-chart-pie me-2 text-success"></i>System Engine Overview
+          </h6>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+            <span class="text-muted small">CNN Base Architecture:</span>
+            <span class="badge bg-light text-dark fw-semibold">MobileNetV2 (ImageNet)</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+            <span class="text-muted small">Input Resolution:</span>
+            <span class="badge bg-light text-dark fw-semibold">224 &times; 224 &times; 3 RGB</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+            <span class="text-muted small">Target Classes:</span>
+            <span class="badge bg-success" id="hero-num-classes">{{ classes|length if classes else '38 Standard' }} Classes</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Benchmark Dataset:</span>
+            <span class="badge bg-light text-dark fw-semibold">PlantVillage Repository</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Analyzer Section -->
+<section id="analyzer-section" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold mb-2">Automated Leaf Pathology Analysis</h2>
+      <p class="text-muted mx-auto" style="max-width: 650px;">
+        Upload a clear photograph of a single plant leaf against a neutral background.
+        The CNN model will preprocess the image, perform feature extraction, and report classification confidence.
+      </p>
+    </div>
+
+    <!-- Alert Box for Client / Server Messages -->
+    <div id="message-container" class="alert d-none mx-auto mb-4" style="max-width: 820px;" role="alert"></div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+
+        <!-- Upload & Input Card -->
+        <div id="upload-card" class="card-custom p-4 mb-4">
+          <!-- Dropzone -->
+          <div id="dropzone" class="dropzone-container" tabindex="0" role="button" aria-label="Dropzone for leaf image upload">
+            <input type="file" id="file-input" class="d-none" accept=".jpg,.jpeg,.png,.webp" />
+            <div class="dropzone-icon">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div class="dropzone-title">Drag & Drop Plant Leaf Photo Here</div>
+            <p class="dropzone-hint mb-3">or click to browse your local device</p>
+            <button type="button" class="btn btn-sm btn-outline-success px-3 rounded-pill" id="btn-browse-file">
+              <i class="fa-solid fa-folder-open me-1"></i> Select File
+            </button>
+            <div class="mt-3 small text-muted">
+              Supported Formats: JPG, JPEG, PNG, WEBP &middot; Max Upload Size: 10 MB
+            </div>
+          </div>
+
+          <!-- Preview & Action Row -->
+          <div id="preview-container" class="d-none mt-4">
+            <div class="row g-4 align-items-center">
+              <div class="col-md-5">
+                <div class="preview-wrapper">
+                  <img id="image-preview" src="" alt="Selected leaf preview" class="preview-img" />
+                  <button type="button" id="btn-reset-preview" class="btn-remove-preview" title="Remove image">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="p-3 bg-light rounded-3 mb-3">
+                  <h6 class="fw-bold mb-2 text-dark" id="preview-filename">leaf_sample.jpg</h6>
+                  <div class="d-flex gap-3 small text-muted">
+                    <span><i class="fa-solid fa-weight-hanging me-1"></i> <span id="preview-filesize">0 KB</span></span>
+                    <span><i class="fa-solid fa-expand me-1"></i> Dimensions: <span id="preview-dimensions">Calculating...</span></span>
+                  </div>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-3">
+                  <i class="fa-solid fa-circle-info me-1"></i>
+                  The image will be converted to RGB, normalized to [-1, 1], and resized to 224&times;224 for MobileNetV2 inference.
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button type="button" id="btn-submit-analysis" class="btn-agri flex-grow-1 justify-content-center">
+                    <span id="btn-spinner" class="spinner-pulse d-none me-2"></span>
+                    <i class="fa-solid fa-wand-magic-sparkles" id="btn-icon"></i>
+                    <span id="btn-text">Run CNN Diagnosis</span>
+                  </button>
+                  <button type="button" id="btn-cancel" class="btn btn-outline-secondary">
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Prediction Result Section -->
+        <div id="results-card" class="card-custom p-4 mb-4 d-none">
+          <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom gap-2">
+            <div>
+              <span class="text-uppercase text-muted fw-bold small">Diagnostic Output</span>
+              <h3 class="mb-0 fw-bold" id="result-predicted-disease">Tomato - Early Blight</h3>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span id="result-health-pill" class="badge-disease badge-infected">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> Pathogen Detected
+              </span>
+              <button type="button" id="btn-analyze-another" class="btn btn-sm btn-outline-success">
+                <i class="fa-solid fa-rotate-left me-1"></i> New Analysis
+              </button>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <!-- Left Column: Confidence Metrics -->
+            <div class="col-lg-5">
+              <div class="card p-3 border-0 bg-light rounded-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold small text-muted">Primary Model Confidence</span>
+                  <span class="fw-bold text-success fs-5" id="result-confidence-percent">98.4%</span>
+                </div>
+                <div class="confidence-bar-bg mb-2">
+                  <div id="result-confidence-bar" class="confidence-bar-fill" style="width: 98%;"></div>
+                </div>
+                <p class="small text-muted mb-0" style="font-size: 0.78rem;">
+                  Derived from normalized softmax activation vector across all target classes.
+                </p>
+              </div>
+
+              <!-- Top Alternative Candidate Predictions -->
+              <div class="card p-3 border-0 bg-light rounded-3 mb-3">
+                <h6 class="fw-bold small text-muted mb-3">
+                  <i class="fa-solid fa-chart-bar me-1"></i> Top Alternative Candidates
+                </h6>
+                <div id="result-alternatives-list">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <!-- Diagnostic Metadata -->
+              <div class="p-3 border rounded-3 bg-white small">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="text-muted">Target Host Crop:</span>
+                  <strong id="result-crop-name">Tomato</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="text-muted">Class Key:</span>
+                  <code id="result-class-key">Tomato___Early_blight</code>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Engine Status:</span>
+                  <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Verified Inference</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Agronomic Profile & Advisory -->
+            <div class="col-lg-7">
+              <!-- Overview Description -->
+              <div class="mb-4">
+                <h6 class="info-section-title">
+                  <i class="fa-solid fa-microscope"></i> Agronomic Profile
+                </h6>
+                <p class="text-muted mb-0" id="result-description">
+                  Loading agronomic overview...
+                </p>
+              </div>
+
+              <!-- Symptoms -->
+              <div class="mb-4">
+                <h6 class="info-section-title">
+                  <i class="fa-solid fa-eye text-warning"></i> Key Visible Symptoms
+                </h6>
+                <ul class="info-list" id="result-symptoms">
+                  <!-- Injected via JavaScript -->
+                </ul>
+              </div>
+
+              <!-- Prevention -->
+              <div class="mb-4">
+                <h6 class="info-section-title">
+                  <i class="fa-solid fa-shield-halved text-success"></i> Preventive Best Practices
+                </h6>
+                <ul class="info-list" id="result-prevention">
+                  <!-- Injected via JavaScript -->
+                </ul>
+              </div>
+
+              <!-- Management -->
+              <div class="mb-3">
+                <h6 class="info-section-title">
+                  <i class="fa-solid fa-hand-holding-medical text-primary"></i> Management & Interventions
+                </h6>
+                <ul class="info-list" id="result-management">
+                  <!-- Injected via JavaScript -->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Disclaimer Card -->
+          <div class="disclaimer-card mt-4">
+            <div class="d-flex gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-warning fs-5 mt-1"></i>
+              <div id="result-disclaimer-text">
+                Academic Disclaimer: This prediction is generated by a Convolutional Neural Network (CNN) trained on the PlantVillage dataset under controlled lighting. Confidence scores represent raw model logits transformed through softmax, not certified pathological proof. Consult a localized agricultural extension agent before applying treatments.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-white border-top border-bottom">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-uppercase text-success fw-bold small">System Pipeline</span>
+      <h2 class="fw-bold">How the Detection Pipeline Operates</h2>
+      <p class="text-muted mx-auto" style="max-width: 600px;">
+        A modular deep learning inference pipeline designed for real-time agricultural visual screening.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="step-card h-100">
+          <div class="step-number">1</div>
+          <h5 class="fw-bold mb-2">Image Acquisition</h5>
+          <p class="text-muted small mb-0">
+            Foliar photograph upload with automatic MIME type verification, size limit checks, and EXIF orientation normalization.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card h-100">
+          <div class="step-number">2</div>
+          <h5 class="fw-bold mb-2">Preprocessing</h5>
+          <p class="text-muted small mb-0">
+            Resizing to 224&times;224 pixels and scaling channel values to [-1, 1] matching MobileNetV2 training specifications.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card h-100">
+          <div class="step-number">3</div>
+          <h5 class="fw-bold mb-2">CNN Inference</h5>
+          <p class="text-muted small mb-0">
+            Deep spatial feature maps generated via inverted residual bottleneck layers with softmax probability extraction.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card h-100">
+          <div class="step-number">4</div>
+          <h5 class="fw-bold mb-2">Agronomic Advisory</h5>
+          <p class="text-muted small mb-0">
+            Dynamic lookup against structured agricultural knowledge base providing symptoms, prevention, and management guidance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Supported Crops Highlights Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-uppercase text-success fw-bold small">Crop Spectrum</span>
+      <h2 class="fw-bold">Major Supported Crop Categories</h2>
+      <p class="text-muted mx-auto" style="max-width: 650px;">
+        Covering standard staple crops, fruits, and solanaceous vegetables from the benchmark PlantVillage catalog.
+      </p>
+    </div>
+
+    <div class="row g-3 text-center">
+      {% set sample_crops = [
+        ('Apple', 'fa-solid fa-apple-whole', 'Scab, Black Rot, Cedar Rust, Healthy'),
+        ('Tomato', 'fa-solid fa-lemon', 'Early Blight, Late Blight, Leaf Mold, Bacterial Spot'),
+        ('Corn (Maize)', 'fa-solid fa-wheat-awn', 'Common Rust, Gray Leaf Spot, Northern Blight'),
+        ('Potato', 'fa-solid fa-seedling', 'Early Blight, Late Blight, Healthy Foliage'),
+        ('Grape', 'fa-solid fa-wine-glass', 'Black Rot, Esca, Leaf Blight, Healthy'),
+        ('Bell Pepper', 'fa-solid fa-pepper-hot', 'Bacterial Spot, Healthy Foliage')
+      ] %}
+
+      {% for crop, icon, diseases in sample_crops %}
+      <div class="col-lg-4 col-md-6">
+        <div class="card-custom p-4 h-100 text-start">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="brand-icon" style="background: #e8f5e9; color: #2e7d32;">
+              <i class="{{ icon }}"></i>
+            </div>
+            <div>
+              <h5 class="mb-0 fw-bold">{{ crop }}</h5>
+              <span class="text-muted small">Agronomic Profile</span>
+            </div>
+          </div>
+          <p class="small text-muted mb-3">
+            <strong>Monitored Pathologies:</strong><br>
+            {{ diseases }}
+          </p>
+          <a href="{{ url_for('diseases') }}" class="small text-success fw-semibold text-decoration-none">
+            View Class Details <i class="fa-solid fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('diseases') }}" class="btn-agri-outline">
+        <i class="fa-solid fa-book-open me-2"></i> Browse All 38 Pathologies in Directory
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Scientific Limitations Notice -->
+<section class="py-4 bg-light border-top">
+  <div class="container">
+    <div class="p-4 bg-white rounded-3 border">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h5 class="fw-bold mb-2 text-dark">
+            <i class="fa-solid fa-circle-exclamation text-warning me-2"></i>Dataset Scope & Deployment Limitations
+          </h5>
+          <p class="text-muted small mb-0">
+            PlantVillage is an open-access dataset curated primarily under controlled lighting conditions with uniform backgrounds.
+            Real agricultural applications face challenges such as varying natural sunlight, leaf motion, overlapping foliage, and soil background clutter.
+            Academic evaluations must report held-out test splits without claiming absolute generalizability to unrestricted in-field photographs.
+          </p>
+        </div>
+        <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
+          <a href="{{ url_for('about') }}" class="btn btn-outline-secondary btn-sm">
+            Read Architectural Details &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

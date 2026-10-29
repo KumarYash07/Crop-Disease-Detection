@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}About Project & Deep Learning Architecture | CropScan AI{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light border-bottom">
+  <div class="container">
+    <div class="max-w-750 mx-auto text-center">
+      <span class="text-uppercase text-success fw-bold small">Technical Documentation & Methodology</span>
+      <h1 class="fw-bold mb-3">Crop Disease Detection using CNN</h1>
+      <p class="text-muted">
+        B.Tech Computer Science and Engineering Capstone Project.
+        An academic examination of Convolutional Neural Networks, Transfer Learning with MobileNetV2,
+        and automated plant leaf pathology screening.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-5">
+      <!-- Main Content -->
+      <div class="col-lg-8">
+
+        <!-- 1. Problem Statement -->
+        <div class="mb-5">
+          <h3 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-bullseye me-2"></i>1. Problem Statement & Motivation
+          </h3>
+          <p class="text-muted">
+            Plant diseases and foliar pathogens represent a significant threat to global food security, responsible for
+            an estimated 20% to 40% loss of worldwide crop yields annually. In conventional farming, disease identification
+            relies heavily on manual visual inspection by agricultural extension officers or laboratory biological assays.
+            However, expert access is often scarce, costly, and geographically constrained in rural communities.
+          </p>
+          <p class="text-muted">
+            This project investigates the application of deep Convolutional Neural Networks (CNNs) to automate foliar disease
+            classification from RGB digital photographs. By combining deep feature extraction with structured agronomic knowledge,
+            the system delivers instantaneous diagnostic screening and verified management recommendations.
+          </p>
+        </div>
+
+        <!-- 2. CNN Architecture & Transfer Learning -->
+        <div class="mb-5">
+          <h3 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-network-wired me-2"></i>2. CNN Architecture & Transfer Learning
+          </h3>
+          <p class="text-muted">
+            Rather than training an arbitrary deep network from scratch with random weight initializations, this project
+            employs <strong>Transfer Learning</strong> utilizing the <strong>MobileNetV2</strong> architecture pretrained on
+            the ImageNet dataset (1.4 million images across 1,000 object categories).
+          </p>
+
+          <div class="card p-4 bg-light border-0 rounded-3 mb-4">
+            <h5 class="fw-bold mb-3">Why MobileNetV2 for Crop Pathology?</h5>
+            <ul class="mb-0 text-muted small">
+              <li class="mb-2">
+                <strong>Depthwise Separable Convolutions:</strong> Factorizes standard 3D convolutions into a depthwise spatial
+                filter and a 1&times;1 pointwise projection, reducing computational complexity (FLOPs) by ~8&times; with minimal accuracy loss.
+              </li>
+              <li class="mb-2">
+                <strong>Inverted Residuals with Linear Bottlenecks:</strong> Retains non-linear feature representations in low-dimensional
+                bottleneck layers without destroying critical gradient flows, allowing deep feature propagation.
+              </li>
+              <li class="mb-2">
+                <strong>Edge & Mobile Friendly:</strong> With ~3.5 million parameters, MobileNetV2 is lightweight enough to run in real-time
+                on resource-constrained devices, edge computers, and low-cost farm smartphones.
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="fw-bold mb-2">Custom Classification Head:</h5>
+          <ol class="text-muted small ps-3 mb-4">
+            <li class="mb-2"><strong>Input Layer:</strong> Accepts 224 &times; 224 &times; 3 tensors normalized to the range [-1.0, 1.0].</li>
+            <li class="mb-2"><strong>Base Feature Extractor:</strong> MobileNetV2 frozen base extracting rich multi-scale spatial textures.</li>
+            <li class="mb-2"><strong>Global Average Pooling (GAP):</strong> Collapses 7 &times; 7 spatial feature maps into a 1D vector (1,280 features), dramatically reducing parameters compared to traditional dense flatten layers.</li>
+            <li class="mb-2"><strong>Batch Normalization:</strong> Accelerates convergence and stabilizes internal covariate shift.</li>
+            <li class="mb-2"><strong>Fully-Connected Dense Layer:</strong> 256 units with Rectified Linear Unit (ReLU) activation.</li>
+            <li class="mb-2"><strong>Dropout (0.4):</strong> Stochastically deactivates 40% of neurons during training to prevent co-adaptation and penalize overfitting.</li>
+            <li class="mb-2"><strong>Output Layer:</strong> Softmax activation over target disease classes, outputting a valid probability distribution where &sum; p<sub>i</sub> = 1.0.</li>
+          </ol>
+        </div>
+
+        <!-- 3. Key Deep Learning Concepts Explained (For Viva) -->
+        <div class="mb-5">
+          <h3 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-graduation-cap me-2"></i>3. Deep Learning Concepts (Viva Reference)
+          </h3>
+          <div class="accordion" id="vivaAccordion">
+            <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button collapsed fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                  What is a Convolutional Layer and Kernel/Filter?
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                <div class="accordion-body small text-muted">
+                  A convolutional layer applies learnable sliding filters (e.g. 3&times;3 matrices) across the input image. Each filter computes dot products with local receptive fields, generating feature maps that capture spatial hierarchies: early layers capture low-level edges and color gradients, while deeper layers detect complex biological textures like concentric rings, pustules, and vein lesions.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                  Why use Softmax instead of Sigmoid for Multiclass Classification?
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                <div class="accordion-body small text-muted">
+                  Sigmoid activates each output neuron independently between 0 and 1 (ideal for binary or multi-label classification). For mutually exclusive single-class multiclass problems (e.g., choosing 1 of 38 categories for a single leaf), Softmax normalizes raw logits across the entire class spectrum using the exponential function: <code>P(y=i) = exp(z_i) / &sum; exp(z_j)</code>, enforcing that all probabilities sum strictly to 1.0.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+              <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                  How does Early Stopping mitigate Overfitting?
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                <div class="accordion-body small text-muted">
+                  Overfitting occurs when a model memorizes idiosyncrasies of training samples rather than generalizing to unseen data. Early Stopping monitors validation loss (<code>val_loss</code>) at each epoch. If validation loss ceases to improve for a predefined patience period (e.g. 5 epochs), training halts automatically and weights from the best performing checkpoint are restored.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Dataset & Scientific Limitations -->
+        <div class="mb-5">
+          <h3 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>4. Dataset & Scientific Limitations
+          </h3>
+          <p class="text-muted">
+            The model is trained on the benchmark <strong>PlantVillage dataset</strong> (Hughes & Salathé, 2015).
+            While PlantVillage provides standardized labels and high-resolution foliar captures, academic rigor requires
+            acknowledging critical environmental constraints:
+          </p>
+          <ul class="text-muted small">
+            <li class="mb-2">
+              <strong>Controlled Lab Conditions:</strong> PlantVillage leaves were detached and photographed against uniform gray or black backdrops under controlled diffuse illumination.
+            </li>
+            <li class="mb-2">
+              <strong>Context & Background Bias:</strong> In actual agricultural fields, cameras encounter complex natural clutter: soil, sunlight glares, morning dew, shadows, overlapping leaves, and background weeds.
+            </li>
+            <li class="mb-2">
+              <strong>Dual Infection:</strong> Plant leaves can suffer from concurrent nutrient deficiencies (e.g., nitrogen chlorosis) and viral infections simultaneously, which single-label classification cannot fully decompose.
+            </li>
+          </ul>
+        </div>
+
+        <!-- 5. Future Scope -->
+        <div class="mb-4">
+          <h3 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-rocket me-2"></i>5. Future Scope & Roadmap
+          </h3>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card p-3 h-100 bg-light border-0">
+                <h6 class="fw-bold text-success"><i class="fa-solid fa-mobile-screen me-2"></i>Edge AI & TFLite</h6>
+                <p class="small text-muted mb-0">Quantizing the Keras model to 8-bit integer TensorFlow Lite (TFLite) for offline on-device deployment in rural mobile apps without internet connectivity.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card p-3 h-100 bg-light border-0">
+                <h6 class="fw-bold text-success"><i class="fa-solid fa-draw-polygon me-2"></i>Semantic Segmentation</h6>
+                <p class="small text-muted mb-0">Integrating YOLOv8 or U-Net to segment necrotic lesions and quantify leaf disease severity percentage rather than whole-image classification.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Tech Stack Card -->
+        <div class="card-custom p-4 mb-4">
+          <h5 class="fw-bold mb-3 text-dark">Technology Stack</h5>
+          <table class="table table-sm small mb-0">
+            <tbody>
+              <tr>
+                <td class="text-muted">Deep Learning:</td>
+                <td><strong>TensorFlow 2.21 &middot; Keras 3.15</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Base Architecture:</td>
+                <td><strong>MobileNetV2 (CNN)</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Backend:</td>
+                <td><strong>Flask 3.1 &middot; Werkzeug</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Image Processing:</td>
+                <td><strong>Pillow &middot; NumPy</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Metrics & Eval:</td>
+                <td><strong>scikit-learn &middot; Seaborn</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Frontend:</td>
+                <td><strong>HTML5 &middot; CSS3 &middot; Vanilla JS</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">UI Framework:</td>
+                <td><strong>Bootstrap 5.3 &middot; FontAwesome</strong></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Testing:</td>
+                <td><strong>pytest</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- System Architecture Card -->
+        <div class="card-custom p-4 mb-4">
+          <h5 class="fw-bold mb-3 text-dark">Data Flow Architecture</h5>
+          <div class="p-3 bg-light rounded text-center small text-muted font-monospace mb-3">
+            [User Upload]<br>
+            &darr;<br>
+            [MIME & Format Validation]<br>
+            &darr;<br>
+            [EXIF & RGB Conversion]<br>
+            &darr;<br>
+            [Resize 224&times;224 &amp; [-1, 1] Norm]<br>
+            &darr;<br>
+            [MobileNetV2 CNN Forward Pass]<br>
+            &darr;<br>
+            [Softmax Class Probabilities]<br>
+            &darr;<br>
+            [Agronomic Knowledge Base Lookup]<br>
+            &darr;<br>
+            [Interactive Advisory Dashboard]
+          </div>
+          <p class="small text-muted mb-0">
+            Zero external AI APIs or cloud dependencies required; all inference executes entirely within local memory.
+          </p>
+        </div>
+
+        <!-- Academic Viva Checklist -->
+        <div class="card-custom p-4">
+          <h5 class="fw-bold mb-3 text-dark">Viva Presentation Points</h5>
+          <ul class="small text-muted ps-3 mb-0">
+            <li class="mb-2">Explain reason for selecting MobileNetV2 over heavy architectures like VGG16 (FLOPs & speed).</li>
+            <li class="mb-2">Demonstrate data preprocessing and identical normalization pipeline in training and inference.</li>
+            <li class="mb-2">Highlight the role of Global Average Pooling in parameter reduction.</li>
+            <li class="mb-2">Clarify that confidence scores reflect softmax probabilities rather than calibrated biological proof.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

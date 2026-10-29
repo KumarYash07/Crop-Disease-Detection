@@ -1,0 +1,38 @@
+{
+  "builder_name": "text",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "plant_village",
+  "dataset_size": 17186049,
+  "description": "",
+  "download_size": 16697301,
+  "features": {
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 33883350,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 13684860,
+      "num_examples": 129783,
+      "dataset_name": "plant_village"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 3501189,
+      "num_examples": 33133,
+      "dataset_name": "plant_village"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

@@ -1,0 +1,52 @@
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables and secrets
+.env
+.env.*
+*.local.env
+!.env.example
+
+# Dataset and archives
+data/PlantVillage/
+data/PlantVillage_Images/
+data/processed/
+data/processed_full/
+data/*.zip
+data/*.tar.gz
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Model files - exclude large trained models
+artifacts/*.keras
+artifacts/*.h5
+artifacts/*.weights.h5
+artifacts_full/*.keras
+artifacts_full/*.h5
+artifacts_full/*.weights.h5
+
+# Keep documentation
+!artifacts/README.md
+!artifacts_full/README.md
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

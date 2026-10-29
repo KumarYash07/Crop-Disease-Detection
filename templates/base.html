@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Academic Web Dashboard for Crop Disease Detection using Convolutional Neural Networks (CNNs) on plant leaf photographs.">
+  <meta name="keywords" content="Crop Disease Detection, Convolutional Neural Network, Deep Learning, MobileNetV2, PlantVillage, Agricultural AI">
+  <title>{% block title %}Crop Disease Detection using CNN{% endblock %}</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}" id="nav-brand-logo">
+        <span class="brand-icon"><i class="fa-solid fa-leaf"></i></span>
+        <span>CropScan<span style="color: #4caf50;">AI</span></span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+              aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation" id="btn-navbar-toggle">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('index') }}" id="nav-home">
+              <i class="fa-solid fa-house me-1"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/diseases' %}active{% endif %}" href="{{ url_for('diseases') }}" id="nav-diseases">
+              <i class="fa-solid fa-book-medical me-1"></i> Supported Diseases
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{ url_for('about') }}" id="nav-about">
+              <i class="fa-solid fa-circle-info me-1"></i> About Project
+            </a>
+          </li>
+        </ul>
+
+        <!-- Model Diagnostics Badge -->
+        <div class="d-flex align-items-center gap-2" id="navbar-status-container">
+          <div id="model-status-indicator" class="status-pill offline" title="Live status of the trained CNN model artifact">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <span>Checking Engine...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Block -->
+  <main class="flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-lg-5 col-md-6">
+          <h5 class="text-white mb-3">
+            <i class="fa-solid fa-leaf text-success me-2"></i>Crop Disease Detection CNN
+          </h5>
+          <p class="text-muted text-light-50 small mb-2">
+            A deep learning computer vision framework engineered for early foliar diagnosis in crops.
+            Designed and implemented for B.Tech Computer Science Engineering final evaluation.
+          </p>
+          <p class="small text-muted text-light-50">
+            <strong>Framework:</strong> TensorFlow/Keras &middot; MobileNetV2 &middot; Flask &middot; PlantVillage Dataset
+          </p>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-6">
+          <h6 class="text-white mb-3">Navigation</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2"><a href="{{ url_for('index') }}">Leaf Diagnosis</a></li>
+            <li class="mb-2"><a href="{{ url_for('diseases') }}">Supported Crops Directory</a></li>
+            <li class="mb-2"><a href="{{ url_for('about') }}">Architecture & Methodology</a></li>
+            <li class="mb-2"><a href="/api/health" target="_blank">Engine Health Diagnostics</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4 col-md-3 col-6">
+          <h6 class="text-white mb-3">Scientific References</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2">
+              <a href="https://github.com/spMohanty/PlantVillage-Dataset" target="_blank" rel="noopener">
+                <i class="fa-brands fa-github me-1"></i> PlantVillage Public Dataset
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="https://arxiv.org/abs/1801.04381" target="_blank" rel="noopener">
+                <i class="fa-solid fa-file-pdf me-1"></i> MobileNetV2 Architecture
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="https://www.tensorflow.org/api_docs" target="_blank" rel="noopener">
+                <i class="fa-solid fa-code me-1"></i> TensorFlow Keras Documentation
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="border-secondary opacity-25">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted text-light-50 pt-2">
+        <div>
+          &copy; Academic Project &mdash; Convolutional Neural Network for Crop Leaf Pathology.
+        </div>
+        <div class="mt-2 mt-md-0">
+          <span>Non-commercial educational screening tool</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Client-side Application Logic -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
